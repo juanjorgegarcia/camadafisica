@@ -20,9 +20,10 @@ import time
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/tty.usbmodem14501" # Mac    (variacao de)
-#serialName = "COM5"                  # Windows(variacao de)
+#serialName = "/dev/tty.usbmodem14501" # Mac    (variacao de)
+serialName = "COM3"                  # Windows(variacao de)
 
+fileName = "jovicone.jpg"
 
 
 print("porta COM aberta com sucesso")
@@ -37,7 +38,7 @@ def main():
     com.enable()
 
     #verificar que a comunicação foi aberta
-    print("comunicação aberta")
+    print("comunicaçao aberta")
 
 
     # a seguir ha um exemplo de dados sendo carregado para transmissao
@@ -46,7 +47,7 @@ def main():
     print ("gerando dados para transmissao :")
   
    
-    with open("./jovicone.jpg","rb") as img:
+    with open(fileName,"rb") as img:
         f = img.read()
         b = bytearray(f)
 
@@ -82,14 +83,14 @@ def main():
     # rxBuffer= list(rxBuffer)
     # print ("rxbuffer",rxBuffer)
 
-    with open("./joviresposta.jpg","wb") as f:
+    with open("./ImageRecebida.jpg","wb") as f:
         f.write((rxBuffer))
 
     
 
     # Encerra comunicação
     print("-------------------------")
-    print("Comunicação encerrada")
+    print("Comunicaçao encerrada")
     print("-------------------------")
     com.disable()
 
