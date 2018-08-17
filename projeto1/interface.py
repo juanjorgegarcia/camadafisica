@@ -2,7 +2,8 @@ from tkinter import *
 from tkinter import filedialog
 from PIL import ImageTk, Image
 import aplicacao
-
+from receiving import *
+from postman import *
 
 
 interface = Tk()
@@ -60,7 +61,7 @@ def updateImg():
 b2 = Button(interface, text="Choose File", command=choosefile)
 b2.pack()
 
-b = Button(interface, text="Send", command=callback)
+b = Button(interface, text="Send", command=sendInfo)
 b.pack(side = "bottom")
 
 
