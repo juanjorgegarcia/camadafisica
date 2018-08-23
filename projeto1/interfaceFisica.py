@@ -11,7 +11,7 @@ import serial
 
 # importa pacote para conversão binário ascii
 import binascii
-
+import time
 #################################
 # Interface com a camada física #
 #################################
@@ -28,6 +28,8 @@ class fisica(object):
         self.stop        = serial.STOPBITS_ONE
         self.timeout     = 0.1
         self.rxRemain    = b""
+
+        self.temporeal = 0
 
     def open(self):
         """ Opens serial port and configure it
@@ -48,8 +50,14 @@ class fisica(object):
     def flush(self):
         """ Clear serial data
         """
+        beginTime = time.clock()
         self.port.flushInput()
         self.port.flushOutput()
+        afterTime= time.clock()
+        global temporeal
+        self.temporeal = alo-oi
+        print(f"Tempo real de envio dentro do flus: {afterTime - beginTime} s")
+        print("ALGUMA COISA TEM Q PRINTAR")
 
     def encode(self, data):
         """ Encode TX as ASCII data for transmission
@@ -72,8 +80,11 @@ class fisica(object):
         Software flow control between both
         sides of communication.
         """
+        startTime = time.time()
         nTx = self.port.write(self.encode(txBuffer))
         self.port.flush()
+        stopTime= time.time()
+        print(f"Esse e o tempo final do experimento interface fisica: {stopTime-startTime}")
         return(nTx/2)
 
     def read(self, nBytes):

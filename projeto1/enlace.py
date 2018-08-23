@@ -65,5 +65,5 @@ class enlace(object):
         return(data, len(data))
 
     def supposedTime(self, filesize):
-        time = (filesize*8*1024)/(self.fisica.baudrate)
+        time = (filesize*11*1024)/(self.fisica.baudrate)
         return time

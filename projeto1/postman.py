@@ -20,14 +20,13 @@ import time
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/tty.usbmodem14101"# Mac    (variacao de)
+serialName = "/dev/tty.usbmodem14401"# Mac    (variacao de)
 # serialName = "COM3"                  # Windows(variacao de)
 
 fileName = "./ImageRecebida.jpg"
 
 
 print("porta COM aberta com sucesso")
-
 
 
 def sendInfo():
@@ -52,11 +51,16 @@ def sendInfo():
     txBuffer = b
     txLen    = len(txBuffer)
     print(txLen)
+    imgSize = txLen
     # print(f"TxBuffer {txBuffer}")
 
     # Transmite dado
     print("tentado transmitir .... {} bytes".format(txLen))
+    # oii=time.time()
     com.sendData(txBuffer)
+    
+    # alo = time.time()
+    
     print(f"Tamanho da imagem: {(txLen)} bytes")
     print(f"Tempo suposto de envio: {com.supposedTime(txLen)} ms")
     
@@ -65,7 +69,10 @@ def sendInfo():
     print("-------------------------")
     print("Comunicaçao encerrada")
     print("-------------------------")
+    print(f"TEMPO REAL UOUO {(com.fisica.temporeal)} s")
     com.disable()
+
+
 
 
 if __name__ == "__main__":

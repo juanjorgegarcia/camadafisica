@@ -33,11 +33,20 @@ class TX(object):
     def thread(self):
         """ TX thread, to send data in parallel with the code
         """
+        beginTime = time.clock()
         while not self.threadStop:
             if(self.threadMutex):
+                
                 self.transLen    = self.fisica.write(self.buffer)
+
+
+                
                 #print("O tamanho transmitido. IMpressao dentro do thread {}" .format(self.transLen))
                 self.threadMutex = False
+        afterTime = time.clock()
+        # print(f"Tempo real de envio no tx: {afterTime - beginTime}")
+
+
 
     def threadStart(self):
         """ Starts TX thread (generate and run)
@@ -70,6 +79,7 @@ class TX(object):
         of transmission, this erase all content of the buffer
         in order to save the new value.
         """
+        
         self.transLen   = 0
         self.buffer = data
         self.threadMutex  = True
