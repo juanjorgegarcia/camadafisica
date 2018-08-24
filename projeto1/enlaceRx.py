@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #####################################################
 # Camada Física da Computação
-#Carareto
-#17/02/2018
+# Carareto
+# 17/02/2018
 #  Camada de Enlace
 ####################################################
 
@@ -14,21 +14,23 @@ import time
 import threading
 
 # Class
+
+
 class RX(object):
     """ This class implements methods to handle the reception
         data over the p2p fox protocol
     """
-    
+
     def __init__(self, fisica):
         """ Initializes the TX class
         """
-        self.fisica      = fisica
-        self.buffer      = bytes(bytearray())
-        self.threadStop  = False
+        self.fisica = fisica
+        self.buffer = bytes(bytearray())
+        self.threadStop = False
         self.threadMutex = True
-        self.READLEN     = 1024
+        self.READLEN = 1024
 
-    def thread(self): 
+    def thread(self):
         """ RX thread, to send data in parallel with the code
         essa é a funcao executada quando o thread é chamado. 
         """
@@ -88,44 +90,51 @@ class RX(object):
         """ Remove n data from buffer
         """
         self.threadPause()
-        b           = self.buffer[0:nData]
+        h = self.buffer[0:2]
+        b = self.buffer[2:nData]
+        # eop = self.buffer[nData:]
+
+        h = int.from_bytes(h, byteorder= "big")
+        if (h != len(b)):
+            print(f"Deu errado! Tamanho: {len(b)}")
+        else:
+            print(f"Deu certo! Tamanho {len(b)}")
+
         self.buffer = self.buffer[nData:]
         self.threadResume()
         return(b)
 
-    def getNData(self,size):
+    def getNData(self, size):
         """ Read N bytes of data from the reception buffer
 
         This function blocks until the number of bytes is received
         """
 #        temPraLer = self.getBufferLen()
 #        print('leu %s ' + str(temPraLer) )
-        
-        #if self.getBufferLen() < size:
-            #print("ERROS!!! TERIA DE LER %s E LEU APENAS %s", (size,temPraLer))
-        
+
+        # if self.getBufferLen() < size:
+        #print("ERROS!!! TERIA DE LER %s E LEU APENAS %s", (size,temPraLer))
+
         # while(self.getBufferLen() < size):
         #     time.sleep(0.05)
-#       
+#
 #         running = True
 
-        dataSize = 0          
+        dataSize = 0
 
         receivingTime = 0
         while (self.getBufferLen() > dataSize) or (self.getBufferLen() == 0):
             if self.getBufferLen() != 0:
                 receivingTime = time.time()
             dataSize = self.getBufferLen()
-            time.sleep(0.20)
+            
+            time.sleep(1.50)
             print(f"BufferLen: {self.getBufferLen()}")
         stopTime = time.time()
         print(f"Tempo para recebimento da imagen: {stopTime-receivingTime}")
         return(self.getBuffer(dataSize))
 
-
     def clearBuffer(self):
         """ Clear the reception buffer
         """
         self.buffer = b""
-
-

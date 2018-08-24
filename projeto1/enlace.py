@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #####################################################
 # Camada Física da Computação
-#Carareto
-#17/02/2018
+# Carareto
+# 17/02/2018
 #  Camada de Enlace
 ####################################################
 
@@ -20,6 +20,7 @@ from interfaceFisica import fisica
 from enlaceRx import RX
 from enlaceTx import TX
 
+
 class enlace(object):
     """ This class implements methods to the interface between Enlace and Application
     """
@@ -27,10 +28,10 @@ class enlace(object):
     def __init__(self, name):
         """ Initializes the enlace class
         """
-        self.fisica      = fisica(name)
-        self.rx          = RX(self.fisica)
-        self.tx          = TX(self.fisica)
-        self.connected   = False
+        self.fisica = fisica(name)
+        self.rx = RX(self.fisica)
+        self.tx = TX(self.fisica)
+        self.connected = False
 
     def enable(self):
         """ Enable reception and transmission
@@ -55,13 +56,17 @@ class enlace(object):
         """
         self.tx.sendBuffer(data)
 
-    def getData(self,size ):
+    def makePackage(self, filename):
+        package = self.tx.createPackage(filename)
+        return package
+
+    def getData(self, size):
         """ Get n data over the enlace interface
         Return the byte array and the size of the buffer
         """
-        print('entrou na leitura e tentara ler  ' )
+        print('entrou na leitura e tentara ler  ')
         data = self.rx.getNData(size)
-       
+
         return(data, len(data))
 
     def supposedTime(self, filesize):
