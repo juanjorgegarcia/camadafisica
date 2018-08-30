@@ -23,7 +23,7 @@ import time
 serialName = "/dev/cu.usbmodem14101"  # Mac    (variacao de)
 # serialName = "COM3"                  # Windows(variacao de)
 
-fileName = "./jovicone.jpg"
+fileName = "./teste.jpg"
 
 
 print("porta COM aberta com sucesso")

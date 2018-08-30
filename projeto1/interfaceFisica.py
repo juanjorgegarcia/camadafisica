@@ -26,7 +26,7 @@ class fisica(object):
         self.bytesize    = serial.EIGHTBITS
         self.parity      = serial.PARITY_NONE
         self.stop        = serial.STOPBITS_ONE
-        self.timeout     = 0.1
+        self.timeout     = 0.5
         self.rxRemain    = b""
 
         self.temporeal = 0

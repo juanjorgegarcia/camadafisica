@@ -32,39 +32,57 @@ class TX(object):
         self.threadStop = False
 
 
-    def createHeader(self, imgSize):
+    def createHeader(self, msgType, imgSize):
         bytesSize = imgSize.to_bytes(2, byteorder = "big")
-        return bytesSize
+        msgType = msgType.to_bytes(1, byteorder = "big")
+
+        supposedTime = (imgSize*10)/(self.fisica.baudrate)
+        print(f"Supposed transfer time: {round(supposedTime,4)}")
+       
+        header = msgType + bytesSize
+
+        return header
 
     def createPayload(self, filename):
-        with open(filename, "rb") as img:
-            payload = img.read()
 
-        payload = b'ronaldo' +payload
+        if filename != "":
+            with open(filename, "rb") as img:
+                payload = img.read()
+            
+        else:
+            payload = (11).to_bytes(2, byteorder='big')
+        
         return payload
 
-    def createEOP(self):
-        eop = b'ronaldo'
 
+    def createEOP(self):
+        eop = (1024).to_bytes(2, byteorder='big')
         return eop
 
-    def createPackage(self, filename):
+    def createPackage(self, msgType, filename):
+        
         payload = self.createPayload(filename)
         eop = self.createEOP()
-        stuf = b'00'
+        stuf = (00).to_bytes(2, byteorder='big')
         if eop in payload:
-            print(f"a imagem possui um eop: {payload}")
+            print(f"a imagem possui um eop: {len(payload)}")
             new_payload = payload.replace(eop,stuf+eop)
-            print(f"nova str {new_payload}")
-
+            print(f"nova str {len(new_payload)}")
+            print("Stuffing feito")
+        else:
+            new_payload = payload
+            print("Stuffing nao foi feito")
         payloadLen = len(payload)
         print("tentado transmitir .... {} bytes".format(len(new_payload)))
-
-        header = self.createHeader(payloadLen)
         
-
-        self.package = header+new_payload+eop
-        print(f"Esse é o pacote {self.package}")
+        header = self.createHeader(msgType, payloadLen)
+        
+        
+        self.package = header + new_payload + eop
+        overhead = len(self.package)/len(payload)
+        print(f"Esse é o pacote {len(self.package)}")
+        print(f"Overhead de {overhead} ")
+        print(f"Throughput: {overhead*self.fisica.baudrate} ")
         return self.package
 
     def thread(self):

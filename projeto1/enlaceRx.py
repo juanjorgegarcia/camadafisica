@@ -90,51 +90,91 @@ class RX(object):
         """ Remove n data from buffer
         """
         self.threadPause()
-        h = self.buffer[0:2]
-        b = self.buffer[2:nData]
+        # h = self.buffer[0:2]
+        b = self.buffer[0:nData]
         # eop = self.buffer[nData:]
 
-        h = int.from_bytes(h, byteorder= "big")
-        if (h != len(b)):
-            print(f"Deu errado! Tamanho: {len(b)}")
-        else:
-            print(f"Deu certo! Tamanho {len(b)}")
+        # h = int.from_bytes(h, byteorder= "big")
+        # if (h != len(b)):
+        #     print(f"Deu errado! Tamanho: {len(b)}")
+        # else:
+        # print(f"Deu certo! Tamanho {len(b)}")
 
         self.buffer = self.buffer[nData:]
         self.threadResume()
         return(b)
 
-    def getNData(self, size):
+    def getNData(self):
         """ Read N bytes of data from the reception buffer
 
         This function blocks until the number of bytes is received
         """
-#        temPraLer = self.getBufferLen()
-#        print('leu %s ' + str(temPraLer) )
 
-        # if self.getBufferLen() < size:
-        #print("ERROS!!! TERIA DE LER %s E LEU APENAS %s", (size,temPraLer))
+        running = True
 
-        # while(self.getBufferLen() < size):
-        #     time.sleep(0.05)
-#
-#         running = True
+
+        eop = (1024).to_bytes(2, byteorder='big')   
 
         dataSize = 0
 
-        receivingTime = 0
-        while (self.getBufferLen() > dataSize) or (self.getBufferLen() == 0):
-            if self.getBufferLen() != 0:
-                receivingTime = time.time()
-            dataSize = self.getBufferLen()
+
+        stuf = (00).to_bytes(2, byteorder='big')
+        stuffedEOP = 0
+        realEOP = 0
+        bufferLido = b''
+        sleepTime = .5
+        counter = 0
+        receivingTime = time.time()
+        while running:
+            bufferLen = self.getBufferLen()
+            bufferLido += self.getBuffer(bufferLen)
+            time.sleep(.5)
+            print(len(bufferLido))
+            if eop in bufferLido:
+                stuffedEOP = bufferLido.count(stuf+eop)
+                realEOP = bufferLido.count(eop)
+
+            if bufferLen == 0 and len(bufferLido) != 0:
+                counter += 1
+            else:
+                counter = 0
             
-            time.sleep(1.50)
-            print(f"BufferLen: {self.getBufferLen()}")
-        stopTime = time.time()
-        print(f"Tempo para recebimento da imagen: {stopTime-receivingTime}")
-        return(self.getBuffer(dataSize))
+            # print(f"StufferEOP: {stuffedEOP}")
+            # print(f"realEOP: {realEOP}")
+            if realEOP > stuffedEOP:
+                print("Mensagem acabou")
+                break
+            elif counter > 4:
+                print("Timeout: eop nao localizado")
+                break
+            
+        eopIndex = bufferLido.rindex(eop)
+        print(f"Posição do EOP {eopIndex}")
+        msg = bufferLido.replace(stuf+eop,eop)
+        # stopTime = time.time()
+        # print(f"Tempo para recebimento da imagen: {stopTime-receivingTime} s")
+        return(msg)
 
     def clearBuffer(self):
         """ Clear the reception buffer
         """
         self.buffer = b""
+
+    def verifyFileIntegrity(self, msg):
+        if len(self.getPayload(msg)) != int.from_bytes(msg[1:3], byteorder = "big"):
+            print("Erro no numero de bytes recebidos")
+            return False
+        else:
+            print("Mensagem recebida com sucesso")
+            return True
+
+    def verifyMsgType(self, msg):
+        msgType = int.from_bytes(msg[0], byteorder = "big")
+        print(f"Received message of Type {msgType}")
+
+        return (msgType)
+
+    def getPayload(self, msg):
+        eop = (1024).to_bytes(2, byteorder='big')
+        payload = msg[3:(len(msg)-len(eop))]
+        return payload

@@ -46,19 +46,19 @@ def receiveInfo():
     bytesSeremLidos=com.rx.getBufferLen()
   
         
-    rxBuffer, nRx = com.getData(10  )
+    rxBuffer = com.getData()
 
     # log
-    print ("Lido              {} bytes ".format(nRx))
+    # print ("Lido              {} bytes ".format(nRx))
     # rxBuffer= list(rxBuffer)
     # print ("rxbuffer",rxBuffer)
 
-    print(f"Tamanho da imagem: {nRx} bytes")
-    print(f"Tempo suposto de envio: {com.supposedTime(nRx)} ms")
+    # print(f"Tamanho da imagem: {nRx} bytes")
+    # print(f"Tempo suposto de envio: {com.supposedTime(nRx)} ms")
 
 
     with open("./ImageRecebida.jpg","wb") as f:
-        f.write((rxBuffer))
+        f.write(rxBuffer)
 
     
 

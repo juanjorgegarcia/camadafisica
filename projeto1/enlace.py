@@ -56,19 +56,31 @@ class enlace(object):
         """
         self.tx.sendBuffer(data)
 
-    def makePackage(self, filename):
-        package = self.tx.createPackage(filename)
+    def makePackage(self, msgType,filename):
+        package = self.tx.createPackage(msgType,filename)
         return package
 
-    def getData(self, size):
+    def getData(self):
         """ Get n data over the enlace interface
         Return the byte array and the size of the buffer
         """
         print('entrou na leitura e tentara ler  ')
-        data = self.rx.getNData(size)
+        data = self.rx.getNData()
 
-        return(data, len(data))
+        return (data)
 
     def supposedTime(self, filesize):
         time = (filesize*11*1024)/(self.fisica.baudrate)
         return time
+    
+    def receiveData(self):
+        return self.rx.receivedData
+
+    def getMsgType(self, data):
+        return (self.rx.verifyMsgType(data))
+
+    def cleanMsg(self, data):
+        return self.rx.getPayload()
+
+    def verifyFileIntegrity():
+        return self.rx.verifyFileIntegrity()
