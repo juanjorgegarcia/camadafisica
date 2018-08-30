@@ -44,8 +44,8 @@ class Comunicator():
         print ("Recebendo dados .... ")
         bytesSeremLidos = self.com.rx.getBufferLen()
             
-        data = self.com.getData()
-        msgType = self.com.getMsgType(data)
+        self.data = self.com.getData()
+        msgType = self.com.getMsgType(self.data)
 
         self.reply(msgType)
             
@@ -59,25 +59,35 @@ class Comunicator():
             self.receiveInfo()
 
     def reply(self, msgType):
-        if msgType == 3:
-            openToReceiveData()
+        if msgType == 1:
+            self.sendInfo(2)
+        elif msgType == 2:
+            self.sendInfo(3)
+            time.sleep(0.5)
+            self.sendInfo(4, "./jovicone.jpg")
+        elif msgType == 3:
+            # openToReceiveData()
+            print("Im ready son")
         elif msgType == 4:
-            if self.com.verifyFileIntegrity(data):  
-                self.saveFile(self.com.cleanMsg(data))
+            if self.com.verifyFileIntegrity(self.data):  
+                self.saveFile(self.com.cleanMsg(self.data))
                 self.sendInfo(5)
             else:
                 self.sendInfo(7)
+        elif msgType == 5:
+            self.sendInfo(7)
+            self.quitt()
+        elif msgType == 6:
+            self.sendInfo(4, "./smile.png")
         elif msgType == 7:
-            quit()
-        else:
-            self.sendInfo(msgType)
+            self.quitt()
 
 
     def saveFile(self, data):
         with open("./ImageRecebida.jpg","wb") as f:
             f.write(data)
 
-    def quit(self):
+    def quitt(self):
         self.com.disable()
 
 

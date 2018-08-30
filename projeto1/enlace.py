@@ -82,5 +82,5 @@ class enlace(object):
     def cleanMsg(self, data):
         return self.rx.getPayload()
 
-    def verifyFileIntegrity():
-        return self.rx.verifyFileIntegrity()
+    def verifyFileIntegrity(self, data):
+        return self.rx.verifyFileIntegrity(data)

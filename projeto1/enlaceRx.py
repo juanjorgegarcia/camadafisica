@@ -169,7 +169,7 @@ class RX(object):
             return True
 
     def verifyMsgType(self, msg):
-        msgType = int.from_bytes(msg[0], byteorder = "big")
+        msgType = int.from_bytes(msg[0:1], byteorder = "big")
         print(f"Received message of Type {msgType}")
 
         return (msgType)
