@@ -80,7 +80,7 @@ class TX(object):
         
         self.package = header + new_payload + eop
         overhead = len(self.package)/len(payload)
-        print(f"Esse é o pacote {len(self.package)}")
+        print(f"Tamanho do pacote: {len(self.package)} bytes")
         print(f"Overhead de {overhead} ")
         print(f"Throughput: {overhead*self.fisica.baudrate} ")
         return self.package

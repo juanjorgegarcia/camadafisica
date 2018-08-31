@@ -124,15 +124,18 @@ class RX(object):
         bufferLido = b''
         sleepTime = .5
         counter = 0
-        receivingTime = time.time()
+        receivingTime = time.clock()
         while running:
             bufferLen = self.getBufferLen()
             bufferLido += self.getBuffer(bufferLen)
-            time.sleep(.5)
+            
             print(len(bufferLido))
             if eop in bufferLido:
                 stuffedEOP = bufferLido.count(stuf+eop)
                 realEOP = bufferLido.count(eop)
+
+            if time.clock() - receivingTime > 5 and len(bufferLido) == 0:
+                return "TIMEOUT"
 
             if bufferLen == 0 and len(bufferLido) != 0:
                 counter += 1
@@ -146,7 +149,10 @@ class RX(object):
                 break
             elif counter > 4:
                 print("Timeout: eop nao localizado")
+                return "TIMEOUT"
                 break
+            
+            time.sleep(.5)            
             
         eopIndex = bufferLido.rindex(eop)
         print(f"Posição do EOP {eopIndex}")

@@ -80,7 +80,7 @@ class enlace(object):
         return (self.rx.verifyMsgType(data))
 
     def cleanMsg(self, data):
-        return self.rx.getPayload()
+        return self.rx.getPayload(data)
 
     def verifyFileIntegrity(self, data):
         return self.rx.verifyFileIntegrity(data)

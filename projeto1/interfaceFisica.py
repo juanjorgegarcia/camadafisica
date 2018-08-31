@@ -84,7 +84,7 @@ class fisica(object):
         nTx = self.port.write(self.encode(txBuffer))
         self.port.flush()
         stopTime= time.time()
-        print(f"Esse e o tempo final do experimento interface fisica: {stopTime-startTime}")
+        # print(f"Esse e o tempo final do experimento interface fisica: {stopTime-startTime}")
         return(nTx/2)
 
     def read(self, nBytes):

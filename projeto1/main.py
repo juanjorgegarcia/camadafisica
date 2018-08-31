@@ -46,7 +46,5 @@ def main():
     print("Comunicaçao encerrada")
     print("-------------------------")
 
-    c.quit()
-
 if __name__ == "__main__":
     main()
