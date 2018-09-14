@@ -28,13 +28,12 @@ class Comunicator():
         # Ativa comunicacao
         self.com.enable()
 
-        
-    def mountFilePackages(self, msgType, errorNumPackage = 0 ,filename = "")
-        self.filePackages = self.com.makePackages(msgType, errorNumPackage, filename = filename)
+
+    def mountFilePackages(self, msgType, errorNumPackage = 0 ,filename = ""):
+        self.filePackages = self.com.makePackages(msgType, errorNumPackage, filename)
    
     def sendInfo(self, packageNum = 0):
         
-        print(f"Transfering data of Type {msgType} ...")
 
 
         self.com.sendData(self.filePackages[packageNum])
@@ -68,8 +67,9 @@ class Comunicator():
         self.running = True
         self.state = 0
         if self.client:
+            self.mountFilePackages(1)
             self.state = 1
-            self.sendInfo(1)
+            self.sendInfo()
         while self.running:
             self.receiveInfo()
 

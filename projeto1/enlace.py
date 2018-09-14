@@ -56,8 +56,8 @@ class enlace(object):
         """
         self.tx.sendBuffer(data)
 
-    def makePackage(self, msgType,filename):
-        package = self.tx.createPackage(msgType,filename)
+    def makePackages(self, msgType, filename, errorNumPackage = 0):
+        package = self.tx.createPackages(msgType, errorNumPackage,filename)
         return package
 
     def getData(self):
