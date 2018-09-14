@@ -30,16 +30,21 @@ class TX(object):
         self.empty = True
         self.threadMutex = False
         self.threadStop = False
+        self.packages = []
 
-
-    def createHeader(self, msgType, imgSize):
+    def createHeader(self, msgType, imgSize, packageNum, numOfPackages, errorNumPackage):
         bytesSize = imgSize.to_bytes(2, byteorder = "big")
         msgType = msgType.to_bytes(1, byteorder = "big")
+
+        errorNumPackage = errorNumPackage.to_bytes(1, byteorder = "big")
+        packageNum = packageNum.to_bytes(2, byteorder = "big")
+        numOfPackages = numOfPackages.to_bytes(2, byteorder = "big")
+
 
         supposedTime = (imgSize*10)/(self.fisica.baudrate)
         print(f"Supposed transfer time: {round(supposedTime,4)}")
        
-        header = msgType + bytesSize
+        header = msgType + bytesSize + packageNum + numOfPackages + errorNumPackage
 
         return header
 
@@ -59,11 +64,12 @@ class TX(object):
         eop = (1024).to_bytes(2, byteorder='big')
         return eop
 
-    def createPackage(self, msgType, filename):
+    def createPackages(self, msgType, filename, errorNumPackage=0):
         
         payload = self.createPayload(filename)
         eop = self.createEOP()
         stuf = (00).to_bytes(2, byteorder='big')
+
         if eop in payload:
             print(f"a imagem possui um eop: {len(payload)}")
             new_payload = payload.replace(eop,stuf+eop)
@@ -72,18 +78,24 @@ class TX(object):
         else:
             new_payload = payload
             print("Stuffing nao foi feito")
-        payloadLen = len(payload)
-        print("tentado transmitir .... {} bytes".format(len(new_payload)))
-        
-        header = self.createHeader(msgType, payloadLen)
-        
-        
-        self.package = header + new_payload + eop
-        overhead = len(self.package)/len(payload)
-        print(f"Tamanho do pacote: {len(self.package)} bytes")
-        print(f"Overhead de {overhead} ")
-        print(f"Throughput: {overhead*self.fisica.baudrate} ")
-        return self.package
+
+        dividedFile = [new_payload[i:i+128] for i in range(0,len(new_payload),128)]
+        print(f'Quantidade de pacotes: {len(dividedFile)}')
+        for i in range(len(dividedFile)):
+            payload=dividedFile[i]
+            payloadLen = len(payload)
+            print(f"Indice do pacote: {i}")
+            print(f'Tamanho do pacote: {len(payload)}')
+
+            header = self.createHeader(msgType, payloadLen, i, len(dividedFile), errorNumPackage)
+            
+            # self.package = header + new_payload + eop
+            # overhead = len(self.package)/len(payload)
+            # print(f"Tamanho do pacote: {len(self.package)} bytes")
+            # print(f"Overhead de {overhead} ")
+            # print(f"Throughput: {overhead*self.fisica.baudrate} ")
+            self.packages.append(header + new_payload + eop)
+        return self.packages
 
     def thread(self):
         """ TX thread, to send data in parallel with the code
@@ -150,3 +162,8 @@ class TX(object):
         """ Return true if a transmission is ongoing
         """
         return(self.threadMutex)
+
+    def getPackageByNum(self, packageNum):
+        """ Return the exactly package number
+        """
+        return self.packages[packageNum]

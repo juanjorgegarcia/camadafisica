@@ -84,3 +84,11 @@ class enlace(object):
 
     def verifyFileIntegrity(self, data):
         return self.rx.verifyFileIntegrity(data)
+
+    def getPackageNumber(self,data):
+        return self.rx.getPackageNumber(data)
+
+    def getPackageByNum(self, packageNum):
+        return self.tx.getPackageByNum(packageNum)
+    
+

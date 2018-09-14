@@ -159,7 +159,7 @@ class RX(object):
         msg = bufferLido.replace(stuf+eop,eop)
         # stopTime = time.time()
         # print(f"Tempo para recebimento da imagen: {stopTime-receivingTime} s")
-        return(msg)
+        return (msg)
 
     def clearBuffer(self):
         """ Clear the reception buffer
@@ -184,3 +184,9 @@ class RX(object):
         eop = (1024).to_bytes(2, byteorder='big')
         payload = msg[3:(len(msg)-len(eop))]
         return payload
+
+    def getPackageNumber(self, msg):
+
+        packageNumber = int.from_bytes(msg[3:5], byteorder = "big")
+
+        return packageNumber
