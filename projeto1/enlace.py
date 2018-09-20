@@ -56,15 +56,14 @@ class enlace(object):
         """
         self.tx.sendBuffer(data)
 
-    def makePackages(self, msgType, filename, errorNumPackage = 0):
-        package = self.tx.createPackages(msgType, errorNumPackage,filename)
+    def makePackages(self, msgType, filename, errorNumPackage):
+        package = self.tx.createPackages(msgType, filename,errorNumPackage)
         return package
 
     def getData(self):
         """ Get n data over the enlace interface
         Return the byte array and the size of the buffer
         """
-        print('entrou na leitura e tentara ler  ')
         data = self.rx.getNData()
 
         return (data)
@@ -79,9 +78,6 @@ class enlace(object):
     def getMsgType(self, data):
         return (self.rx.verifyMsgType(data))
 
-    def cleanMsg(self, data):
-        return self.rx.getPayload(data)
-
     def verifyFileIntegrity(self, data):
         return self.rx.verifyFileIntegrity(data)
 
@@ -90,5 +86,10 @@ class enlace(object):
 
     def getPackageByNum(self, packageNum):
         return self.tx.getPackageByNum(packageNum)
-    
+
+    def getPayload(self, data):
+        return self.rx.getPayload(data)
+
+    def cleanStuffing(self, data):
+        return self.rx.cleanStuffing(data)
 

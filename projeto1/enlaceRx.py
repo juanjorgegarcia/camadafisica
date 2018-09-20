@@ -145,21 +145,21 @@ class RX(object):
             # print(f"StufferEOP: {stuffedEOP}")
             # print(f"realEOP: {realEOP}")
             if realEOP > stuffedEOP:
-                print("Mensagem acabou")
+                print("EOP found")
                 break
             elif counter > 4:
-                print("Timeout: eop nao localizado")
+                print("Timeout: EOP not found")
                 return "TIMEOUT"
                 break
             
             time.sleep(.5)            
-            
+
         eopIndex = bufferLido.rindex(eop)
-        print(f"Posição do EOP {eopIndex}")
-        msg = bufferLido.replace(stuf+eop,eop)
+        print(f"EOP position: {eopIndex}")
+        # msg = bufferLido.replace(stuf+eop,eop) # estava diminuindo o tamanho do pacote e prejudicando a verificacao
         # stopTime = time.time()
         # print(f"Tempo para recebimento da imagen: {stopTime-receivingTime} s")
-        return (msg)
+        return (bufferLido)
 
     def clearBuffer(self):
         """ Clear the reception buffer
@@ -168,21 +168,20 @@ class RX(object):
 
     def verifyFileIntegrity(self, msg):
         if len(self.getPayload(msg)) != int.from_bytes(msg[1:3], byteorder = "big"):
-            print("Erro no numero de bytes recebidos")
+            print(f"Error: Payload size does not match Headers info - Header {int.from_bytes(msg[1:3], byteorder = 'big')} / actual Payload {len(self.getPayload(msg))}")
             return False
         else:
-            print("Mensagem recebida com sucesso")
+            print("Package passed all verification tests")
             return True
 
     def verifyMsgType(self, msg):
         msgType = int.from_bytes(msg[0:1], byteorder = "big")
-        print(f"Received message of Type {msgType}")
 
         return (msgType)
 
     def getPayload(self, msg):
         eop = (1024).to_bytes(2, byteorder='big')
-        payload = msg[3:(len(msg)-len(eop))]
+        payload = msg[8:(len(msg)-len(eop))]
         return payload
 
     def getPackageNumber(self, msg):
@@ -190,3 +189,9 @@ class RX(object):
         packageNumber = int.from_bytes(msg[3:5], byteorder = "big")
 
         return packageNumber
+
+    def cleanStuffing(self, data):
+        eop = (1024).to_bytes(2, byteorder='big')
+        stuf = (00).to_bytes(2, byteorder='big')
+        noStufData = data.replace(stuf+eop,eop)
+        return noStufData

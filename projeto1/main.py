@@ -7,8 +7,6 @@
 #  Main
 ####################################################
 
-print("comecou")
-
 from enlace import *
 import time
 import comunicator
@@ -24,19 +22,21 @@ from sys import argv
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
 # serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/cu.usbmodem14101"  # Mac    (variacao de)
+# serialName = "/dev/cu.usbmodem14101"  # Mac    (variacao de)
 # serialName = "COM3"                  # Windows(variacao de)
 
-fileName = "./teste.jpg"
+fileName = "./joji.jpg"
 
 
-print("porta COM aberta com sucesso")
+
 
 def main():
     
     c = comunicator.Comunicator(argv[2],argv[1])
 
     c.startCom()
+
+    print("porta COM aberta com sucesso")
 
     c.waitForResponse()
 

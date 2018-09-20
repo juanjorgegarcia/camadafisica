@@ -20,7 +20,7 @@ class Comunicator():
         self.filePackages = []
         self.currentPackage = 0
         self.receivedPackage = 0
-        self.message = 0
+        self.message = None
     def startCom(self):
         # Inicializa enlace ... variavel com possui todos os metodos e propriedades do enlace, que funciona em threading
         self.com = enlace(self.serialName)
@@ -30,12 +30,14 @@ class Comunicator():
 
 
     def mountFilePackages(self, msgType, errorNumPackage = 0 ,filename = ""):
-        self.filePackages = self.com.makePackages(msgType, errorNumPackage, filename)
+        self.currentPackage = 0
+        self.filePackages = self.com.makePackages(msgType,filename, errorNumPackage)
+        
+        # print(f"MOUNT FILE OF TYPE {self.com.getMsgType(self.filePackages[0])}")
+
    
     def sendInfo(self, packageNum = 0):
-        
-
-
+        print(f"Sending Data: type {self.com.getMsgType(self.filePackages[packageNum])} / PackNum:total {packageNum}:{len(self.filePackages)} / Pack size {len(self.filePackages[packageNum])} / Payload size {len(self.com.getPayload(self.filePackages[packageNum]))} / Type8 addon {int.from_bytes(self.filePackages[packageNum][7:8], byteorder = 'big')}")
         self.com.sendData(self.filePackages[packageNum])
 
         # alo = time.time()
@@ -45,7 +47,7 @@ class Comunicator():
 
     def receiveInfo(self):
         # Faz a recepção dos dados
-        print ("Recebendo dados .... ")
+        print("Receiving ...")
         
 
         self.data = self.com.getData()
@@ -53,13 +55,16 @@ class Comunicator():
         if self.data == "TIMEOUT":
             print("DEU TIMEOUT")
             if self.state == 4:
-                self.sendInfo(self.state, "./jovicone.jpg")
+                self.sendInfo(self.currentPackage)
+            elif self.state == 3:
+                self.mountFilePackages(8, errorNumPackage = self.receivedPackage )
+                self.sendInfo()
             elif self.state != 0:
-                self.sendInfo(self.state)
+                self.mountFilePackages(self.state)
+                self.sendInfo()
         else:
             msgType = self.com.getMsgType(self.data)
-
-            # self.reply(msgType)
+            
             self.respond(msgType)
 
 
@@ -73,51 +78,21 @@ class Comunicator():
         while self.running:
             self.receiveInfo()
 
-    # def reply(self, msgType):
-    #     if msgType == 1:
-    #         self.state = 2
-    #         self.sendInfo(2)
-    #     elif msgType == 2:
-    #         self.sendInfo(3)
-    #         time.sleep(0.5)
-    #         self.state = 4
-    #         self.sendInfo(4, "./smile.png")
-    #     elif msgType == 3:
-    #         self.state = 3
-    #         print("Im ready son")
-    #     elif msgType == 4:
-    #         if self.com.verifyFileIntegrity(self.data):  
-    #             self.saveFile(self.com.cleanMsg(self.data))
-    #             self.state = 5
-    #             self.sendInfo(5)
-    #         else:
-    #             self.state = 6
-    #             self.sendInfo(6)
-    #     elif msgType == 5:
-    #         self.state = 7
-    #         self.sendInfo(7)
-    #         time.sleep(0.5)
-    #         self.quitt()
-    #     elif msgType == 6:
-    #         self.state = 4
-    #         self.sendInfo(4, "./smile.png")
-    #     elif msgType == 7:
-    #         self.state = 7
-    #         self.quitt()
 
     def respond(self, msgType):
+        print(f"Received message of Type {msgType}")
         if self.state == 0:
             if msgType == 1:
-                self.mountFilePackage(2)
+                self.mountFilePackages(2)
                 self.state = 2
                 self.sendInfo()
                 return
         elif self.state == 1:
             if msgType == 2:
-                self.mountFilePackage(3)
+                self.mountFilePackages(3)
                 self.sendInfo()
                 time.sleep(0.5)
-                self.mountFilePackage(4, filename = "./jovicone.jpg" )
+                self.mountFilePackages(4, filename = "./smalljoji.jpg" )
                 self.state = 4
                 self.sendInfo(self.currentPackage)
                 return
@@ -128,57 +103,56 @@ class Comunicator():
                 return
         elif self.state == 3:
             if msgType == 4:
-                if self.com.verifyNumberOfPackage(self.data, self.receivedPackage):
+                if self.verifyNumberOfPackage(self.data, self.receivedPackage):
                     if self.com.verifyFileIntegrity(self.data):  
-                        self.receivedPackage = self.com.getPackageNumber(self.data)
-                        # self.saveFile(self.com.cleanMsg(self.data))
-                        self.mountFilePackage(5)
-                        self.message += self.data
+                        self.receivedPackage += 1
+                        self.mountFilePackages(5)
+                        if (self.message == None):
+                            self.message = bytearray(self.com.getPayload(self.data))
+                        else:
+                            self.message += (bytearray(self.com.getPayload(self.data)))
                         self.sendInfo()
                         return
                     else:
                         
-                        self.mountFilePackage(6)
+                        self.mountFilePackages(6)
                         self.sendInfo()
                         return
                 else:
-                    self.mountFilePackage(8, errorNumPackage = self.com.getPackageNumber(self.data) )
+                    print(f"Received wrong Package: wanted No.{self.receivedPackage} / received No.{self.com.getPackageNumber(self.data)}")
+                    self.mountFilePackages(8, errorNumPackage = self.receivedPackage)
                     self.sendInfo()
 
                     return
-                    # self.state = 8        
+            elif msgType == 7:
+                self.saveFile(self.message)
+                print("Message Saved!")
+                print(f'{self.receivedPackage} Packages received')
+                print(f'File size: {len(self.message)} bytes')
+                self.quitt()
+                return
+
         elif self.state == 4:
             
             if msgType == 5:
                 self.currentPackage += 1
                 if self.currentPackage == len(self.filePackages):
-                    print('Todos os Pacotes Foram enviados!!')
-                    self.mountFilePackage(msgType=7)
+                    print('All packages were sent!!')
+                    self.mountFilePackages(msgType=7)
                     self.sendInfo()
                     self.state = 7
                     self.quitt()
                 else:
                     self.sendInfo(packageNum = self.currentPackage)   
-               
-
-                # self.state = 7
-                # self.sendInfo(7)
-                # time.sleep(0.5)
-                # self.quitt()
                 return
+
             elif msgType == 8:
-
                 self.currentPackage =  self.com.getPackageNumber(self.data)
-                self.sendInfo(packageNum = self.currentPackage)   
+                self.sendInfo(packageNum = self.currentPackage) 
+                return 
+
             elif msgType == 6:
-                self.sendInfo(packageNum= self.currentPackage)
-                return
-        elif self.state == 5:
-            if msgType == 7:
-                self.state = 7
-                print(f'Foram recebidos {self.receivedPackage} pacotes')
-                prinf(f'Tamanho total do payload: {len(self.message)}')
-                self.quitt()
+                self.sendInfo(packageNum=self.currentPackage)
                 return
         else:
             print("Error: Invalid State ", self.state)
@@ -191,8 +165,10 @@ class Comunicator():
         self.state = newState
 
     def saveFile(self, data):
+        noStufData = self.com.cleanStuffing(data)
+        print("Stuff cleaned")
         with open("./ImageRecebida.jpg","wb") as f:
-            f.write(data)
+            f.write(noStufData)
 
     def quitt(self):
         self.com.disable()
