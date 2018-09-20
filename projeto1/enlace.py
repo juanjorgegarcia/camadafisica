@@ -84,6 +84,10 @@ class enlace(object):
     def getPackageNumber(self,data):
         return self.rx.getPackageNumber(data)
 
+    def getNumberOfPackages(self, data):
+        total = self.rx.getNumberOfPackages(data)
+        return total
+
     def getPackageByNum(self, packageNum):
         return self.tx.getPackageByNum(packageNum)
 
@@ -93,3 +97,12 @@ class enlace(object):
     def cleanStuffing(self, data):
         return self.rx.cleanStuffing(data)
 
+    def getType8Addon(self, data):
+        addon = self.rx.getType8Addon(data)
+        return addon
+
+    def crc16(self, data):
+        return self.tx.crc16(data)
+
+    def getCRCResult(self, data):
+        return self.rx.getCRCResult(data)

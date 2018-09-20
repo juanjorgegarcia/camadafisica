@@ -32,7 +32,7 @@ class TX(object):
         self.threadStop = False
         self.packages = []
 
-    def createHeader(self, msgType, imgSize, packageNum, numOfPackages, errorNumPackage):
+    def createHeader(self, msgType, imgSize, packageNum, numOfPackages, errorNumPackage, payload):
         bytesSize = imgSize.to_bytes(2, byteorder = "big")
         msgType = msgType.to_bytes(1, byteorder = "big")
 
@@ -40,11 +40,14 @@ class TX(object):
         packageNum = packageNum.to_bytes(2, byteorder = "big")
         numOfPackages = numOfPackages.to_bytes(2, byteorder = "big")
 
+        intPayload = int.from_bytes(payload, byteorder="big")
+        crc = self.crc16(intPayload)
+        crcBytes = crc.to_bytes(2, byteorder = "big")
 
         supposedTime = (imgSize*10)/(self.fisica.baudrate)
         # print(f"Supposed transfer time: {round(supposedTime,4)}")
        
-        header = msgType + bytesSize + packageNum + numOfPackages + errorNumPackage
+        header = msgType + bytesSize + packageNum + numOfPackages + errorNumPackage + crcBytes
 
         return header
 
@@ -87,7 +90,7 @@ class TX(object):
             # print(f"Indice do pacote: {i}")
             # print(f'Tamanho do pacote: {len(payload)}')
 
-            header = self.createHeader(msgType, payloadLen, i, len(dividedFile), errorNumPackage)
+            header = self.createHeader(msgType, payloadLen, i, len(dividedFile), errorNumPackage, payload)
 
             # self.package = header + new_payload + eop
             # overhead = len(self.package)/len(payload)
@@ -167,3 +170,15 @@ class TX(object):
         """ Return the exactly package number
         """
         return self.packages[packageNum]
+
+    def crc16(self, data):
+        q = 0b1010101010101010
+        d = data << (q.bit_length()-1)
+
+        while d.bit_length()>=q.bit_length():
+            shiftado = d>>d.bit_length()-q.bit_length()
+            shiftando = d - (shiftado << (d.bit_length() - shiftado.bit_length()))
+            conta = shiftado^q
+            d = (conta << (d.bit_length() - shiftado.bit_length())) + shiftando
+        
+        return d

@@ -57,7 +57,7 @@ class Comunicator():
             if self.state == 4:
                 self.sendInfo(self.currentPackage)
             elif self.state == 3:
-                self.mountFilePackages(8, errorNumPackage = self.receivedPackage )
+                self.mountFilePackages(8, errorNumPackage = self.receivedPackage -1)
                 self.sendInfo()
             elif self.state != 0:
                 self.mountFilePackages(self.state)
@@ -80,7 +80,7 @@ class Comunicator():
 
 
     def respond(self, msgType):
-        print(f"Received message of Type {msgType}")
+        print(f"Received message: type {msgType} / PackNum:total {self.com.getPackageNumber(self.data)}:{self.com.getNumberOfPackages(self.data)}")
         if self.state == 0:
             if msgType == 1:
                 self.mountFilePackages(2)
@@ -104,17 +104,23 @@ class Comunicator():
         elif self.state == 3:
             if msgType == 4:
                 if self.verifyNumberOfPackage(self.data, self.receivedPackage):
-                    if self.com.verifyFileIntegrity(self.data):  
-                        self.receivedPackage += 1
-                        self.mountFilePackages(5)
-                        if (self.message == None):
-                            self.message = bytearray(self.com.getPayload(self.data))
+                    if self.com.verifyFileIntegrity(self.data): 
+                        if self.CRCTest16(self.data): 
+                            self.receivedPackage += 1
+                            self.mountFilePackages(5)
+                            if (self.message == None):
+                                self.message = bytearray(self.com.getPayload(self.data))
+                            else:
+                                self.message += (bytearray(self.com.getPayload(self.data)))
+                            self.sendInfo()
+                            return
                         else:
-                            self.message += (bytearray(self.com.getPayload(self.data)))
-                        self.sendInfo()
-                        return
+                            print(f'Failed to pass CRC test')
+                            self.mountFilePackages(6)
+                            self.sendInfo()
+                            return
                     else:
-                        
+                        print(f'Payload size incorrect')
                         self.mountFilePackages(6)
                         self.sendInfo()
                         return
@@ -147,7 +153,7 @@ class Comunicator():
                 return
 
             elif msgType == 8:
-                self.currentPackage =  self.com.getPackageNumber(self.data)
+                self.currentPackage = self.com.getType8Addon(self.data)
                 self.sendInfo(packageNum = self.currentPackage) 
                 return 
 
@@ -182,3 +188,13 @@ class Comunicator():
         else:
             return False
 
+    def CRCTest16(self, data):
+        payload = self.com.getPayload(data)
+        intPayload = int.from_bytes(payload, byteorder="big")
+
+        bits = self.com.crc16(intPayload)
+
+        if self.com.getCRCResult(data) == bits:
+            return True
+        else:
+            return False

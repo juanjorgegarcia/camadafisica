@@ -181,17 +181,27 @@ class RX(object):
 
     def getPayload(self, msg):
         eop = (1024).to_bytes(2, byteorder='big')
-        payload = msg[8:(len(msg)-len(eop))]
+        payload = msg[10:(len(msg)-len(eop))]
         return payload
 
     def getPackageNumber(self, msg):
-
         packageNumber = int.from_bytes(msg[3:5], byteorder = "big")
-
         return packageNumber
+    
+    def getNumberOfPackages(self, data):
+        total = int.from_bytes(data[5:7], byteorder = "big")
+        return total
 
     def cleanStuffing(self, data):
         eop = (1024).to_bytes(2, byteorder='big')
         stuf = (00).to_bytes(2, byteorder='big')
         noStufData = data.replace(stuf+eop,eop)
         return noStufData
+
+    def getType8Addon(self, data):
+        addon = int.from_bytes(data[7:8], byteorder = "big")
+        return addon
+
+    def getCRCResult(self, data):
+        result = int.from_bytes(data[8:10], byteorder = "big")
+        return result
