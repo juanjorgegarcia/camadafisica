@@ -34,7 +34,8 @@ while not para:
 			sd.wait()
 
 			plt.plot(som)
-			plt.axis([0, 500, -3, 3])
+			axes = plt.gca()
+			axes.set_xlim([0,500])
 			plt.show()
 
 			signal.plotFFT(som, fs)
