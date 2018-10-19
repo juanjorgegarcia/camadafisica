@@ -36,7 +36,6 @@ while True:
 		for j in dic:
 			carac = dic[j]
 			if math.isclose(indexes[i], carac[0], rel_tol=0) and math.isclose(indexes[i+1], carac[1], rel_tol=0):
-				
 				signal.plotFFT(a,fs)
 
 				pyplot.figure(figsize=(8,5))
@@ -46,12 +45,3 @@ while True:
 
 				print("Tecla: " + j)
 				plt.show()
-
-				x1, seno1 = signal.generateSin(carac[0], 1, 0.5, fs)
-				x2, seno2 = signal.generateSin(carac[1], 1, 0.5, fs)
-				seno = seno1 + seno2
-				plt.plot(seno)
-				axes = plt.gca()
-				axes.set_xlim([0,500])
-
-				plt.show() #
