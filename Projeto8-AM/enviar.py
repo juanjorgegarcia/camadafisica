@@ -1,11 +1,11 @@
 import soundfile as sf
 
 data, samplerate = sf.read('dale.wav')
-print(data)
-# with sf.SoundFile('dale.wav', 'rw') as f:
-#     while f.tell() < len(f):
-#         pos = f.tell()
-#         data = f.read(1024)
-#         f.seek(pos)
-#         f.write(data*2)
-print(data)
+one_channel_data=[i[0] for i in data]
+
+# normalized_audio = [i/max(one_channel_data) for i in one_channel_data]
+# normalized_audio = list(map(lambda x: x/max(one_channel_data), one_channel_data))
+
+# print(min(normalized_audio),max(normalized_audio))
+for i in one_channel_data:
+    print(i/max(one_channel_data))
